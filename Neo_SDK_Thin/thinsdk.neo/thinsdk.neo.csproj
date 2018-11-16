@@ -1,0 +1,30 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>netcoreapp2.1; net47</TargetFrameworks>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Authors>NewEconoLabs</Authors>
+    <Company>NewEconoLabs</Company>
+    <PackageId>Neo.sdk.thin</PackageId>
+    <Product>Neo.sdk.thin</Product>
+    <Description>A NEO blockchain development toolkit that does not rely on block synchronization, including transaction construction, address translation, signature, etc.</Description>
+    <Copyright>MIT</Copyright>
+    <AssemblyName>Neo_SDK_thin</AssemblyName>
+    <RepositoryUrl>https://github.com/NewEconoLab/Neo_SDK_Thin</RepositoryUrl>
+    <PackageProjectUrl>https://nel.group/</PackageProjectUrl>
+    <RepositoryType>Github</RepositoryType>
+    <PackageTags>Neo,Blockchain,Smart,Contract,SDK,thin,NewEconoLabs</PackageTags>
+    <FileVersion>1.0.0.1</FileVersion>
+    <Version>1.0.1</Version>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
+    <PackageReference Include="System.Security.Cryptography.Algorithms" Version="4.3.1" />
+  </ItemGroup>
+</Project>
