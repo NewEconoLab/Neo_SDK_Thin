@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netcoreapp2.1; net47</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0</TargetFrameworks>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Authors>NewEconoLabs</Authors>
     <Company>NewEconoLabs</Company>
@@ -14,8 +14,9 @@
     <PackageProjectUrl>https://nel.group/</PackageProjectUrl>
     <RepositoryType>Github</RepositoryType>
     <PackageTags>Neo,Blockchain,Smart,Contract,SDK,thin,NewEconoLabs</PackageTags>
-    <FileVersion>1.0.0.1</FileVersion>
-    <Version>1.0.1</Version>
+    <FileVersion>1.0.2.0</FileVersion>
+    <Version>1.0.2</Version>
+    <PackageReleaseNotes>Change Target To netstandard2.0</PackageReleaseNotes>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">

@@ -8,13 +8,13 @@ A NEO blockchain development toolkit that does not rely on block synchronization
 ## Package Manager
 
 ```
-Install-Package neo.sdk.thin -Version 1.0.1
+Install-Package neo.sdk.thin -Version 1.0.2
 ```
 
 ## .NET CLI
 
 
 ```
-dotnet add package neo.sdk.thin --version 1.0.1
+dotnet add package neo.sdk.thin --version 1.0.2
 ```
 
