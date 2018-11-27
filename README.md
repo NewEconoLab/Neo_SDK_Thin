@@ -2,8 +2,11 @@
 A NEO blockchain development toolkit that does not rely on block synchronization, including transaction construction, address translation, signature, etc.
 
 ## Support for 
-.net .NET Framework 4.6.1+
-.NET Core 2.0+
+
+### .NET Framework 4.6.1+
+
+### .NET Core 2.0+
+
 
 ## Nuget
 
@@ -22,5 +25,6 @@ Install-Package neo.sdk.thin -Version 1.0.2
 dotnet add package neo.sdk.thin --version 1.0.2
 ```
 
+
 ## Example
-[Github Program](https://github.com/NewEconoLab/Neo_SDK_Thin_e.g.)
+[Neo_SDK_Thin_e.g.](https://github.com/NewEconoLab/Neo_SDK_Thin_e.g.)
