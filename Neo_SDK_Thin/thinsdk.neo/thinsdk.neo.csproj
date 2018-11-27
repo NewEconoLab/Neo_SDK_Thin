@@ -14,9 +14,10 @@
     <PackageProjectUrl>https://nel.group/</PackageProjectUrl>
     <RepositoryType>Github</RepositoryType>
     <PackageTags>Neo,Blockchain,Smart,Contract,SDK,thin,NewEconoLabs</PackageTags>
-    <FileVersion>1.0.2.0</FileVersion>
-    <Version>1.0.2</Version>
-    <PackageReleaseNotes>Change Target To netstandard2.0</PackageReleaseNotes>
+    <FileVersion>1.0.3.0</FileVersion>
+    <Version>1.0.3</Version>
+    <PackageReleaseNotes>update info</PackageReleaseNotes>
+    <PackageIconUrl>https://nel-logos.oss-cn-hangzhou.aliyuncs.com/NEL_logo_256.png</PackageIconUrl>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
