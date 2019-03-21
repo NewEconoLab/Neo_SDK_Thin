@@ -150,25 +150,24 @@ namespace ThinNeo
     }
     public class Witness
     {
-        public byte[] InvocationScript;//设置参数脚本，通常是吧signdata push进去
-        public byte[] VerificationScript;//校验脚本，通常是 push 公钥, CheckSig 两条指令   验证的东西就是未签名的交易
-        //这个就是地址的脚本
-        public string Address
-        {
-            get
-            {
-                var hash = ThinNeo.Helper_NEO.CalcHash160(VerificationScript);
-                return ThinNeo.Helper_NEO.GetAddress_FromScriptHash(hash);
-            }
-        }
-        public Hash160 Hash
-        {
-            get
-            {
-                return ThinNeo.Helper_NEO.CalcHash160(VerificationScript);
-            }
-        }
+        public byte[] InvocationScript { get; private set; }//设置参数脚本，通常是吧signdata push进去
+        public byte[] VerificationScript { get; private set; }//校验脚本，通常是 push 公钥, CheckSig 两条指令   验证的东西就是未签名的交易
+        public Hash160 Hash { get; private set; }
+        public string Address { get { return ThinNeo.Helper_NEO.GetAddress_FromScriptHash(Hash); } }
 
+        public Witness(byte[] _invocationScript, byte[] _verificationScript,Hash160 _hash = null)
+        {
+            InvocationScript = _invocationScript;
+            VerificationScript = _verificationScript;
+            if (_hash == null)
+            {
+                Hash = Helper_NEO.CalcHash160(VerificationScript);
+            }
+            else
+            {
+                Hash = _hash;
+            }
+        }
 
         public bool isSmartContract
         {
@@ -560,16 +559,15 @@ namespace ThinNeo
                 this.witnesses = new Witness[witnesscount];
                 for (var i = 0; i < (int)witnesscount; i++)
                 {
-                    this.witnesses[i] = new Witness();
-                    var _witness = this.witnesses[i];
-
                     var iscriptlen = readVarInt(ms);
-                    _witness.InvocationScript = new byte[iscriptlen];
-                    ms.Read(_witness.InvocationScript, 0, _witness.InvocationScript.Length);
+                    var invocationScript = new byte[iscriptlen];
+                    ms.Read(invocationScript, 0, invocationScript.Length);
 
                     var vscriptlen = readVarInt(ms);
-                    _witness.VerificationScript = new byte[vscriptlen];
-                    ms.Read(_witness.VerificationScript, 0, _witness.VerificationScript.Length);
+                    var verificationScript = new byte[vscriptlen];
+                    ms.Read(verificationScript, 0, verificationScript.Length);
+
+                    this.witnesses[i] = new Witness(invocationScript, verificationScript);
                 }
             }
         }
@@ -677,7 +675,7 @@ namespace ThinNeo
         }
 
         //增加智能合约见证人
-        public void AddWitnessScript(byte[] vscript, byte[] iscript)
+        public void AddWitnessScript(byte[] vscript, byte[] iscript ,Hash160 scriptHash = null)
         {
             var scripthash = ThinNeo.Helper_NEO.CalcHash160(vscript);
             List<Witness> wit = null;
@@ -689,9 +687,7 @@ namespace ThinNeo
             {
                 wit = new List<Witness>(witnesses);
             }
-            Witness newwit = new Witness();
-            newwit.VerificationScript = vscript;
-            newwit.InvocationScript = iscript;
+            Witness newwit = new Witness(iscript, vscript, scriptHash);
             foreach (var w in wit)
             {
                 if (w.Address == newwit.Address)
