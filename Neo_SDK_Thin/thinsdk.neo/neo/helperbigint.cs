@@ -86,7 +86,7 @@ namespace ThinNeo
                 b[b.Length - 1] &= (byte)((1 << sizeInBits % 8) - 1);
             return new BigInteger(b);
         }
-        internal static BigInteger NextBigInteger(int sizeInBits)
+        public static BigInteger NextBigInteger(int sizeInBits)
         {
             if (sizeInBits < 0)
                 throw new ArgumentException("sizeInBits must be non-negative");

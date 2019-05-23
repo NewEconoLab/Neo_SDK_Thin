@@ -11,7 +11,7 @@ namespace ThinNeo.Cryptography.ECC
         internal readonly BigInteger Q;
         internal readonly ECFieldElement A;
         internal readonly ECFieldElement B;
-        internal readonly BigInteger N;
+        public readonly BigInteger N;
         /// <summary>
         /// 无穷远点
         /// </summary>
