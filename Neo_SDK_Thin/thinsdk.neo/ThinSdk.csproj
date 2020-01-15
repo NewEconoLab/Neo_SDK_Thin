@@ -1,0 +1,43 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0</TargetFrameworks>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Authors>NewEconoLabs</Authors>
+    <Company>NewEconoLabs</Company>
+    <PackageId>NEL.NEOSDK</PackageId>
+    <Product>NEL.NEOSDK</Product>
+    <Description>A NEO blockchain development toolkit that does not rely on block synchronization, including transaction construction, address translation, signature, etc.</Description>
+    <Copyright>MIT</Copyright>
+    <AssemblyName>Neo_SDK_thin</AssemblyName>
+    <RepositoryUrl>https://github.com/NewEconoLab/Neo_SDK_Thin</RepositoryUrl>
+    <PackageProjectUrl>https://nel.group/</PackageProjectUrl>
+    <RepositoryType>Github</RepositoryType>
+    <PackageTags>NEL,Neo,Blockchain,Smart,Contract,SDK,thin,NewEconoLabs</PackageTags>
+    <FileVersion>1.0.5.0</FileVersion>
+    <Version>1.0.5</Version>
+    <PackageReleaseNotes>update info</PackageReleaseNotes>
+    <PackageIconUrl>https://nel-logos.oss-cn-hangzhou.aliyuncs.com/NEL_logo_256.png</PackageIconUrl>
+    <LangVersion>7.3</LangVersion>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|netstandard2.0|AnyCPU'">
+    <OutputPath>bin\Debug\thinsdk.neo\bin\Debug\</OutputPath>
+  </PropertyGroup>
+
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
+    <PackageReference Include="System.Security.Cryptography.Algorithms" Version="4.3.1" />
+    <PackageReference Include="System.Text.Encodings.Web" Version="4.5.0" />
+  </ItemGroup>
+
+
+  <ItemGroup>
+    <Folder Include="Neo\IO\Json\" />
+  </ItemGroup>
+</Project>

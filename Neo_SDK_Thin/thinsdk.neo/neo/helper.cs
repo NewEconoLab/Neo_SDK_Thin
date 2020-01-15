@@ -1,34 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Numerics;
+using System.Runtime.CompilerServices;
 using System.Text;
+using ThinSdk.Neo.VM;
 
-namespace ThinNeo
+namespace ThinSdk.Neo
 {
     public static class Helper
     {
-        [ThreadStatic]
-        static System.Security.Cryptography.SHA256 _sha256;
-        public static System.Security.Cryptography.SHA256 Sha256
-        {
-            get
-            {
-                if (_sha256 == null)
-                    _sha256 = System.Security.Cryptography.SHA256.Create();
-                return _sha256;
-            }
-        }
-        [ThreadStatic]
-        static ThinNeo.Cryptography.RIPEMD160Managed _ripemd160;
-        public static ThinNeo.Cryptography.RIPEMD160Managed RIPEMD160
-        {
-            get
-            {
-                if (_ripemd160 == null)
-                    _ripemd160 = new ThinNeo.Cryptography.RIPEMD160Managed();
-                return _ripemd160;
-            }
-        }
         [ThreadStatic]
         static System.Security.Cryptography.RandomNumberGenerator _random;
         public static System.Security.Cryptography.RandomNumberGenerator Random
@@ -52,103 +32,174 @@ namespace ThinNeo
             }
         }
 
+        public static int BitLen(int w)
+        {
+            return (w < 1 << 15 ? (w < 1 << 7
+                ? (w < 1 << 3 ? (w < 1 << 1
+                ? (w < 1 << 0 ? (w < 0 ? 32 : 0) : 1)
+                : (w < 1 << 2 ? 2 : 3)) : (w < 1 << 5
+                ? (w < 1 << 4 ? 4 : 5)
+                : (w < 1 << 6 ? 6 : 7)))
+                : (w < 1 << 11
+                ? (w < 1 << 9 ? (w < 1 << 8 ? 8 : 9) : (w < 1 << 10 ? 10 : 11))
+                : (w < 1 << 13 ? (w < 1 << 12 ? 12 : 13) : (w < 1 << 14 ? 14 : 15)))) : (w < 1 << 23 ? (w < 1 << 19
+                ? (w < 1 << 17 ? (w < 1 << 16 ? 16 : 17) : (w < 1 << 18 ? 18 : 19))
+                : (w < 1 << 21 ? (w < 1 << 20 ? 20 : 21) : (w < 1 << 22 ? 22 : 23))) : (w < 1 << 27
+                ? (w < 1 << 25 ? (w < 1 << 24 ? 24 : 25) : (w < 1 << 26 ? 26 : 27))
+                : (w < 1 << 29 ? (w < 1 << 28 ? 28 : 29) : (w < 1 << 30 ? 30 : 31)))));
+        }
+        public static int GetBitLength(this BigInteger i)
+        {
+            byte[] b = i.ToByteArray();
+            return (b.Length - 1) * 8 + BitLen(i.Sign > 0 ? b[b.Length - 1] : 255 - b[b.Length - 1]);
+        }
+        public static int GetLowestSetBit(this BigInteger i)
+        {
+            if (i.Sign == 0)
+                return -1;
+            byte[] b = i.ToByteArray();
+            int w = 0;
+            while (b[w] == 0)
+                w++;
+            for (int x = 0; x < 8; x++)
+                if ((b[w] & 1 << x) > 0)
+                    return x + w * 8;
+            throw new Exception();
+        }
+        public static BigInteger Mod(this BigInteger x, BigInteger y)
+        {
+            x %= y;
+            if (x.Sign < 0)
+                x += y;
+            return x;
+        }
+
+        public static bool TestBit(this BigInteger i, int index)
+        {
+            return (i & (BigInteger.One << index)) > BigInteger.Zero;
+        }
+        internal static BigInteger ModInverse(this BigInteger a, BigInteger n)
+        {
+            BigInteger i = n, v = 0, d = 1;
+            while (a > 0)
+            {
+                BigInteger t = i / a, x = a;
+                a = i % x;
+                i = x;
+                x = d;
+                d = v - t * x;
+                v = x;
+            }
+            v %= n;
+            if (v < 0) v = (v + n) % n;
+            return v;
+        }
+
+        internal static BigInteger NextBigIntegerQuick(int sizeInBits)
+        {
+            if (sizeInBits < 0)
+                throw new ArgumentException("sizeInBits must be non-negative");
+            if (sizeInBits == 0)
+                return 0;
+            byte[] b = new byte[sizeInBits / 8 + 1];
+            RandomQuick.NextBytes(b);
+            if (sizeInBits % 8 == 0)
+                b[b.Length - 1] = 0;
+            else
+                b[b.Length - 1] &= (byte)((1 << sizeInBits % 8) - 1);
+            return new BigInteger(b);
+        }
+        public static BigInteger NextBigInteger(int sizeInBits)
+        {
+            if (sizeInBits < 0)
+                throw new ArgumentException("sizeInBits must be non-negative");
+            if (sizeInBits == 0)
+                return 0;
+            byte[] b = new byte[sizeInBits / 8 + 1];
+            Random.GetBytes(b);
+            if (sizeInBits % 8 == 0)
+                b[b.Length - 1] = 0;
+            else
+                b[b.Length - 1] &= (byte)((1 << sizeInBits % 8) - 1);
+            return new BigInteger(b);
+        }
+
         public static byte[] RandomBytes(int size)
         {
             byte[] data = new byte[size];
             Random.GetBytes(data, 0, data.Length);
             return data;
         }
-        public static string Bytes2HexString(byte[] data)
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        unsafe internal static ushort ToUInt16(this byte[] value, int startIndex)
         {
-            StringBuilder sb = new StringBuilder();
-            foreach (var d in data)
+            fixed (byte* pbyte = &value[startIndex])
             {
-                sb.Append(d.ToString("x02"));
-            }
-            return sb.ToString();
-        }
-        public static byte[] HexString2Bytes(string str)
-        {
-            if (str.IndexOf("0x") == 0)
-                str = str.Substring(2);
-            byte[] outd = new byte[str.Length / 2];
-            for (var i = 0; i < str.Length / 2; i++)
-            {
-                outd[i] = byte.Parse(str.Substring(i * 2, 2), System.Globalization.NumberStyles.HexNumber);
-            }
-            return outd;
-        }
-
-        public static byte[] CalcSha256(byte[] data, int start = 0, int length = -1)
-        {
-            byte[] tdata = null;
-
-            if (start == 0 && length == -1)
-            {
-                tdata = data;
-            }
-            else
-            {
-                tdata = new byte[length];
-                Array.Copy(data, 0, tdata, 0, length);
-            }
-            System.Security.Cryptography.SHA256 sha256 = System.Security.Cryptography.SHA256.Create();
-            return sha256.ComputeHash(tdata);
-
-        }
-
-        public static byte[] Base58CheckDecode(string input)
-        {
-            byte[] buffer = ThinNeo.Cryptography.Base58.Decode(input);
-            if (buffer.Length < 4) throw new FormatException();
-
-            var b1 = CalcSha256(buffer, 0, buffer.Length - 4);
-
-            byte[] checksum = CalcSha256(b1);
-
-            if (!buffer.Skip(buffer.Length - 4).SequenceEqual(checksum.Take(4)))
-                throw new FormatException();
-            return buffer.Take(buffer.Length - 4).ToArray();
-        }
-        public static string Base58CheckEncode(byte[] data)
-        {
-            var b1 = CalcSha256(data);
-            byte[] checksum = CalcSha256(b1);
-            byte[] buffer = new byte[data.Length + 4];
-            Buffer.BlockCopy(data, 0, buffer, 0, data.Length);
-            Buffer.BlockCopy(checksum, 0, buffer, data.Length, 4);
-            return ThinNeo.Cryptography.Base58.Encode(buffer);
-        }
-        internal static byte[] AES256Encrypt(byte[] block, byte[] key)
-        {
-            using (System.Security.Cryptography.Aes aes = System.Security.Cryptography.Aes.Create())
-            {
-                aes.Key = key;
-                aes.Mode = System.Security.Cryptography.CipherMode.ECB;
-                aes.Padding = System.Security.Cryptography.PaddingMode.None;
-                using (System.Security.Cryptography.ICryptoTransform encryptor = aes.CreateEncryptor())
-                {
-                    return encryptor.TransformFinalBlock(block, 0, block.Length);
-                }
+                return *((ushort*)pbyte);
             }
         }
-        internal static byte[] AES256Decrypt(byte[] block, byte[] key)
+
+        public static bool IsMultiSigContract(this byte[] script, out int m, out int n)
         {
-            using (System.Security.Cryptography.Aes aes = System.Security.Cryptography.Aes.Create())
+            m = 0; n = 0;
+            int i = 0;
+            if (script.Length < 41) return false;
+            if (script[i] > (byte)OpCode.PUSH16) return false;
+            if (script[i] < (byte)OpCode.PUSH1 && script[i] != 1 && script[i] != 2) return false;
+            switch (script[i])
             {
-                aes.Key = key;
-                aes.Mode = System.Security.Cryptography.CipherMode.ECB;
-                aes.Padding = System.Security.Cryptography.PaddingMode.None;
-                using (System.Security.Cryptography.ICryptoTransform decryptor = aes.CreateDecryptor())
-                {
-                    return decryptor.TransformFinalBlock(block, 0, block.Length);
-                }
+                case 1:
+                    m = script[++i];
+                    ++i;
+                    break;
+                case 2:
+                    m = script.ToUInt16(++i);
+                    i += 2;
+                    break;
+                default:
+                    m = script[i++] - 80;
+                    break;
             }
+            if (m < 1 || m > 1024) return false;
+            while (script[i] == 33)
+            {
+                i += 34;
+                if (script.Length <= i) return false;
+                ++n;
+            }
+            if (n < m || n > 1024) return false;
+            switch (script[i])
+            {
+                case 1:
+                    if (n != script[++i]) return false;
+                    ++i;
+                    break;
+                case 2:
+                    if (script.Length < i + 3 || n != script.ToUInt16(++i)) return false;
+                    i += 2;
+                    break;
+                default:
+                    if (n != script[i++] - 80) return false;
+                    break;
+            }
+            if (script[i++] != (byte)OpCode.SYSCALL) return false;
+            if (script.Length != i + 4) return false;
+            if (BitConverter.ToUInt32(script, i) != BitConverter.ToUInt32(Neo.Cryptography.Helper.Sha256.ComputeHash(Encoding.ASCII.GetBytes("Neo.Crypto.CheckMultiSig")), 0))
+                return false;
+            return true;
         }
-        public static byte[] XOR(byte[] x, byte[] y)
+
+        public static bool IsSignatureContract(this byte[] script)
         {
-            if (x.Length != y.Length) throw new ArgumentException();
-            return x.Zip(y, (a, b) => (byte)(a ^ b)).ToArray();
+            if (script.Length != 41) return false;
+            if (script[0] != (byte)OpCode.PUSHDATA1
+                || script[1] != 33
+                || script[35] != (byte)OpCode.PUSHNULL
+                || script[36] != (byte)OpCode.SYSCALL
+                || BitConverter.ToUInt32(script, 37) != BitConverter.ToUInt32(Neo.Cryptography.Helper.Sha256.ComputeHash(Encoding.ASCII.GetBytes("Neo.Crypto.ECDsaVerify")), 0))
+                return false;
+            return true;
         }
     }
 }
