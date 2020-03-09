@@ -14,8 +14,8 @@
     <PackageProjectUrl>https://nel.group/</PackageProjectUrl>
     <RepositoryType>Github</RepositoryType>
     <PackageTags>NEL,Neo,Blockchain,Smart,Contract,SDK,thin,NewEconoLabs</PackageTags>
-    <FileVersion>1.0.5.0</FileVersion>
-    <Version>1.0.5</Version>
+    <FileVersion>2.0.0</FileVersion>
+    <Version>2.0.0</Version>
     <PackageReleaseNotes>update info</PackageReleaseNotes>
     <PackageIconUrl>https://nel-logos.oss-cn-hangzhou.aliyuncs.com/NEL_logo_256.png</PackageIconUrl>
     <LangVersion>7.3</LangVersion>

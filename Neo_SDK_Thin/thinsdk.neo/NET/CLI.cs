@@ -9,7 +9,7 @@ namespace ThinSdk.NET
     {
         public string URL = "";
 
-        public CLI(string _url = "http://localhost:10335")  //localhost
+        public CLI(string _url = "http://localhost:10332")  //localhost
         {
             URL = _url;
         }

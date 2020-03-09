@@ -8,6 +8,10 @@ using System.Numerics;
 using Newtonsoft.Json.Linq;
 using ThinSdk.Neo;
 using System.Text;
+using ThinSdk.Neo.VM;
+using ThinSdk.Token;
+using NUnit.Framework.Constraints;
+using ThinSdk.NET;
 
 namespace sdk.UniTest
 {
@@ -24,6 +28,19 @@ namespace sdk.UniTest
             nt.neo.Transfer(addr1, addr2, 200);
             nt.gas.Transfer(addr1,addr2,30000000000);
             var r = await nt.Send(Conversion.WIF2PrivateKey("L1EboNBetFw1JRdoQCjFDjApLrg3pHu62VrD6B983exKYzYpJc1e"));
+            Assert.IsNotNull(r);
+        }
+        [Test]
+        public async Task Test_Invoke()
+        {
+            var addr = Conversion.Address2ScriptHash("NV7LGd57KEsCw2YfDcRosQmeb2qvdamipY");
+            var sb = new ScriptBuilder();
+            var bt = new BaseToken(new UInt160("0x8c23f196d8a1bfd103a9dcb1f9ccf0c611377d3b"), sb);
+            bt.Call_BalanceOf(addr);
+            var bt2 = new BaseToken(new UInt160("0x9bde8f209c88dd0e7ca3bf0af0f476cdd8207789"),sb);
+            bt.Call_BalanceOf(addr);
+            var cli = new ThinSdk.NET.CLI();
+            var r = await cli.GetInvokeData(sb.ToArray().Bytes2HexString());
             Assert.IsNotNull(r);
         }
 
