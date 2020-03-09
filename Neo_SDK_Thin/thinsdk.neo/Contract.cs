@@ -30,7 +30,7 @@ namespace ThinSdk
             ScriptBuilder = _scriptBuilder;
         }
 
-        public void Deploy()
+        public void Create()
         {
             if (Script == null || Script.Length == 0)
                 throw new System.Exception();

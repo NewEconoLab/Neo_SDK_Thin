@@ -16,6 +16,16 @@ namespace ThinSdk.Token
             ScriptBuilder.Emit(OpCode.THROWIFNOT);
         }
 
+        public void Deploy()
+        {
+            Call("deploy");
+        }
+
+        public void Call_TotalSupply()
+        {
+            Call("totalSupply");
+        }
+
         public void Call_BalanceOf(params UInt160[] accounts)
         {
             foreach (UInt160 account in accounts)

@@ -16,7 +16,7 @@ namespace sdk.UniTest
             var pubKey = Conversion.PrivateKey2PublicKey(priKey);
             var str_pub = Conversion.Bytes2HexString(pubKey);
             var assress = Conversion.PublicKey2Address(pubKey);
-            Assert.AreEqual(assress, "AdyoCmmAvg8tQcC4KbM4G8FpfW5ANHWpvN");
+            Assert.AreEqual(assress, "NV7LGd57KEsCw2YfDcRosQmeb2qvdamipY");
         }
     }
 }
