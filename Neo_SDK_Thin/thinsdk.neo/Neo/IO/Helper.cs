@@ -1,4 +1,6 @@
 ﻿using System;
+using K4os.Compression.LZ4;
+using System.Buffers;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -21,6 +23,17 @@ namespace ThinSdk.Neo.IO
             }
         }
 
+        public static unsafe T AsSerializable<T>(this ReadOnlySpan<byte> value) where T : ISerializable, new()
+        {
+            if (value.IsEmpty) throw new FormatException();
+            fixed (byte* pointer = value)
+            {
+                using UnmanagedMemoryStream ms = new UnmanagedMemoryStream(pointer, value.Length);
+                using BinaryReader reader = new BinaryReader(ms, Encoding.UTF8);
+                return reader.ReadSerializable<T>();
+            }
+        }
+
         public static ISerializable AsSerializable(this byte[] value, Type type)
         {
             if (!typeof(ISerializable).GetTypeInfo().IsAssignableFrom(type))
@@ -39,6 +52,17 @@ namespace ThinSdk.Neo.IO
             using (MemoryStream ms = new MemoryStream(value, false))
             using (BinaryReader reader = new BinaryReader(ms, Encoding.UTF8))
             {
+                return reader.ReadSerializableArray<T>(max);
+            }
+        }
+
+        public static unsafe T[] AsSerializableArray<T>(this ReadOnlySpan<byte> value, int max = 0x1000000) where T : ISerializable, new()
+        {
+            if (value.IsEmpty) throw new FormatException();
+            fixed (byte* pointer = value)
+            {
+                using UnmanagedMemoryStream ms = new UnmanagedMemoryStream(pointer, value.Length);
+                using BinaryReader reader = new BinaryReader(ms, Encoding.UTF8);
                 return reader.ReadSerializableArray<T>(max);
             }
         }
@@ -95,7 +119,7 @@ namespace ThinSdk.Neo.IO
                 int count;
                 do
                 {
-                    byte[] group = reader.ReadBytes(GroupingSizeInBytes);
+                    byte[] group = reader.ReadFixedBytes(GroupingSizeInBytes);
                     count = reader.ReadByte();
                     if (count > GroupingSizeInBytes)
                         throw new FormatException();
@@ -106,10 +130,39 @@ namespace ThinSdk.Neo.IO
             }
         }
 
+        public static byte[] ReadFixedBytes(this BinaryReader reader, int size)
+        {
+            var index = 0;
+            var data = new byte[size];
+
+            while (size > 0)
+            {
+                var bytesRead = reader.Read(data, index, size);
+
+                if (bytesRead <= 0)
+                {
+                    throw new FormatException();
+                }
+
+                size -= bytesRead;
+                index += bytesRead;
+            }
+
+            return data;
+        }
+
         public static string ReadFixedString(this BinaryReader reader, int length)
         {
-            byte[] data = reader.ReadBytes(length);
+            byte[] data = reader.ReadFixedBytes(length);
             return Encoding.UTF8.GetString(data.TakeWhile(p => p != 0).ToArray());
+        }
+
+        public static T[] ReadNullableArray<T>(this BinaryReader reader, int max = 0x1000000) where T : class, ISerializable, new()
+        {
+            T[] array = new T[reader.ReadVarInt((ulong)max)];
+            for (int i = 0; i < array.Length; i++)
+                array[i] = reader.ReadBoolean() ? reader.ReadSerializable<T>() : null;
+            return array;
         }
 
         public static T ReadSerializable<T>(this BinaryReader reader) where T : ISerializable, new()
@@ -132,7 +185,7 @@ namespace ThinSdk.Neo.IO
 
         public static byte[] ReadVarBytes(this BinaryReader reader, int max = 0x1000000)
         {
-            return reader.ReadBytes((int)reader.ReadVarInt((ulong)max));
+            return reader.ReadFixedBytes((int)reader.ReadVarInt((ulong)max));
         }
 
         public static ulong ReadVarInt(this BinaryReader reader, ulong max = ulong.MaxValue)
@@ -167,7 +220,7 @@ namespace ThinSdk.Neo.IO
             }
         }
 
-        public static byte[] ToByteArray<T>(this T[] value) where T : ISerializable
+        public static byte[] ToByteArray<T>(this IReadOnlyCollection<T> value) where T : ISerializable
         {
             using (MemoryStream ms = new MemoryStream())
             using (BinaryWriter writer = new BinaryWriter(ms, Encoding.UTF8))
@@ -183,12 +236,12 @@ namespace ThinSdk.Neo.IO
             value.Serialize(writer);
         }
 
-        public static void Write<T>(this BinaryWriter writer, T[] value) where T : ISerializable
+        public static void Write<T>(this BinaryWriter writer, IReadOnlyCollection<T> value) where T : ISerializable
         {
-            writer.WriteVarInt(value.Length);
-            for (int i = 0; i < value.Length; i++)
+            writer.WriteVarInt(value.Count);
+            foreach (T item in value)
             {
-                value[i].Serialize(writer);
+                item.Serialize(writer);
             }
         }
 
@@ -222,10 +275,22 @@ namespace ThinSdk.Neo.IO
                 throw new ArgumentException();
             writer.Write(bytes);
             if (bytes.Length < length)
-                writer.Write(new byte[length - bytes.Length]);
+                writer.Write(stackalloc byte[length - bytes.Length]);
         }
 
-        public static void WriteVarBytes(this BinaryWriter writer, byte[] value)
+        public static void WriteNullableArray<T>(this BinaryWriter writer, T[] value) where T : class, ISerializable
+        {
+            writer.WriteVarInt(value.Length);
+            foreach (var item in value)
+            {
+                bool isNull = item is null;
+                writer.Write(!isNull);
+                if (isNull) continue;
+                item.Serialize(writer);
+            }
+        }
+
+        public static void WriteVarBytes(this BinaryWriter writer, ReadOnlySpan<byte> value)
         {
             writer.WriteVarInt(value.Length);
             writer.Write(value);

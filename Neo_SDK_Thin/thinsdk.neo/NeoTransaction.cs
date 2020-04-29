@@ -37,7 +37,8 @@ namespace ThinSdk
                 Nonce = (UInt32)new Random().Next(),
                 Sender = _sender,
                 ValidUntilBlock = currentBlockIndex + Transaction.MaxValidUntilBlockIncrement - 1,
-                Cosigners = new Cosigner[1] { new Cosigner() { Scopes = WitnessScope.CalledByEntry,Account = _sender} },
+                //Cosigners = new Cosigner[1] { new Cosigner() { Scopes = WitnessScope.CalledByEntry,Account = _sender} },
+                Cosigners = new Cosigner[0] { },
                 Attributes = new TransactionAttribute[0]
             };
         }
@@ -68,7 +69,6 @@ namespace ThinSdk
         public async Task<string> Send(byte[] priKey)
         {
             BigInteger sysFee = await Cli.GetInvokeGasConsumed(scriptBuilder.ToArray().Bytes2HexString());
-            sysFee = (sysFee / 100000000 + 1) * 100000000;
             var hexStr = SignAndPack(priKey, sysFee);
             return await Cli.Sendrawtransaction(hexStr);
         }
@@ -119,6 +119,8 @@ namespace ThinSdk
 
             //签名
             byte[] signData = Crypto.Default.Sign(Tran.GetMessage(), priKey, Conversion.PrivateKey2PublicKey_EncodePointFalse(priKey).Skip(1).ToArray());
+            Console.WriteLine(signData.Bytes2HexString());
+            Console.WriteLine(pubKey.Bytes2HexString());
             var b = Crypto.Default.VerifySignature(Tran.GetMessage(), signData, Conversion.PrivateKey2PublicKey_EncodePointFalse(priKey).Skip(1).ToArray());
             if (!b)
                 throw new Exception("sign error");

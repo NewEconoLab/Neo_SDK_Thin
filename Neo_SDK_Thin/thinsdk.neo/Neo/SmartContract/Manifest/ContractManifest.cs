@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using System.Linq;
+using System;
 using ThinSdk.Neo.IO;
 using ThinSdk.Neo.IO.Json;
 
@@ -50,13 +51,18 @@ namespace ThinSdk.Neo.SmartContract.Manifest
         /// The trusts field is an array containing a set of contract hashes or group public keys. It can also be assigned with a wildcard *. If it is a wildcard *, then it means that it trusts any contract.
         /// If a contract is trusted, the user interface will not give any warnings when called by the contract.
         /// </summary>
-        public WildCardContainer<UInt160> Trusts { get; set; }
+        public WildcardContainer<UInt160> Trusts { get; set; }
 
         /// <summary>
         /// The safemethods field is an array containing a set of method names. It can also be assigned with a wildcard *. If it is a wildcard *, then it means that all methods of the contract are safe.
         /// If a method is marked as safe, the user interface will not give any warnings when it is called by any other contract.
         /// </summary>
-        public WildCardContainer<string> SafeMethods { get; set; }
+        public WildcardContainer<string> SafeMethods { get; set; }
+
+        /// <summary>
+        /// Custom user data
+        /// </summary>
+        public JObject Extra { get; set; }
 
         /// <summary>
         /// Create Default Contract manifest
@@ -77,8 +83,9 @@ namespace ThinSdk.Neo.SmartContract.Manifest
                 },
                 Features = ContractFeatures.NoProperty,
                 Groups = new ContractGroup[0],
-                SafeMethods = WildCardContainer<string>.Create(),
-                Trusts = WildCardContainer<UInt160>.Create()
+                SafeMethods = WildcardContainer<string>.Create(),
+                Trusts = WildcardContainer<UInt160>.Create(),
+                Extra = null,
             };
         }
 
@@ -110,7 +117,8 @@ namespace ThinSdk.Neo.SmartContract.Manifest
         /// </summary>
         /// <param name="json">Json</param>
         /// <returns>Return ContractManifest</returns>
-        public static ContractManifest Parse(string json) => FromJson(JObject.Parse(json));
+
+        internal static ContractManifest Parse(string json) => FromJson(JObject.Parse(json));
 
         /// <summary
         /// To json
@@ -128,15 +136,10 @@ namespace ThinSdk.Neo.SmartContract.Manifest
             json["permissions"] = Permissions.Select(p => p.ToJson()).ToArray();
             json["trusts"] = Trusts.ToJson();
             json["safeMethods"] = SafeMethods.ToJson();
+            json["extra"] = Extra;
 
             return json;
         }
-
-        /// <summary>
-        /// Clone
-        /// </summary>
-        /// <returns>Return a copy of this object</returns>
-        public ContractManifest Clone() => FromJson(ToJson());
 
         /// <summary>
         /// String representation
@@ -160,9 +163,9 @@ namespace ThinSdk.Neo.SmartContract.Manifest
             Groups = ((JArray)json["groups"]).Select(u => ContractGroup.FromJson(u)).ToArray();
             Features = ContractFeatures.NoProperty;
             Permissions = ((JArray)json["permissions"]).Select(u => ContractPermission.FromJson(u)).ToArray();
-            Trusts = WildCardContainer<UInt160>.FromJson(json["trusts"], u => UInt160.Parse(u.AsString()));
-            SafeMethods = WildCardContainer<string>.FromJson(json["safeMethods"], u => u.AsString());
-
+            Trusts = WildcardContainer<UInt160>.FromJson(json["trusts"], u => UInt160.Parse(u.AsString()));
+            SafeMethods = WildcardContainer<string>.FromJson(json["safeMethods"], u => u.AsString());
+            Extra = json["extra"];
             if (json["features"]["storage"].AsBoolean()) Features |= ContractFeatures.HasStorage;
             if (json["features"]["payable"].AsBoolean()) Features |= ContractFeatures.Payable;
         }

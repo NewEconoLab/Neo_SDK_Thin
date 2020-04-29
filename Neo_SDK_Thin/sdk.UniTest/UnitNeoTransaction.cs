@@ -20,6 +20,7 @@ namespace sdk.UniTest
         [Test]
         public async Task Test_Transfer()
         {
+            var b= true ^ true;
             var addr1 = Conversion.Address2ScriptHash("NV7LGd57KEsCw2YfDcRosQmeb2qvdamipY");
             var addr2 = Conversion.Address2ScriptHash("NejD7DJWzD48ZG4gXKDVZt3QLf1fpNe1PF");
             var cli = new ThinSdk.NET.CLI();
@@ -47,17 +48,17 @@ namespace sdk.UniTest
         [Test]
         public async Task Test_CreateContract()
         {
-            var b = Convert.FromBase64String("I3bWcD6Jri7+CSo2fPuihpfMNmo="); //I3bWcD6Jri7\u002BCSo2fPuihpfMNmo=
-            var b2 = new UInt160(b);
-            var bb = System.Text.Encoding.UTF8.GetString(b);
-            var addr1 = Conversion.Address2ScriptHash("NV7LGd57KEsCw2YfDcRosQmeb2qvdamipY");
+            //var b = Convert.FromBase64String("I3bWcD6Jri7+CSo2fPuihpfMNmo="); //I3bWcD6Jri7\u002BCSo2fPuihpfMNmo=
+            //var b2 = new UInt160(b);
+            //var bb = System.Text.Encoding.UTF8.GetString(b);
+            var addr1 = Conversion.Address2ScriptHash("NejD7DJWzD48ZG4gXKDVZt3QLf1fpNe1PF");
             var cli = new ThinSdk.NET.CLI();
             var count = await cli.GetBlockCount();
             var nt = new NeoTransaction(addr1,count, cli);
             NefFile nefFile = NefFile.LoadNef("test.nef");
             ContractManifest contractManifest = ContractManifest.LoadContractManifest("test.manifest.json");
             nt.InitContract(nefFile, contractManifest).Create();
-            var r = await nt.Send(Conversion.WIF2PrivateKey("L1EboNBetFw1JRdoQCjFDjApLrg3pHu62VrD6B983exKYzYpJc1e"));
+            var r = await nt.Send(Conversion.WIF2PrivateKey("L2JHYBNdCwuBqP4HKkqA1VwdZwNAjGgJXFbHP6wa7rEQkaTbWZ2V"));
             Assert.IsNotNull(r);
         }
 

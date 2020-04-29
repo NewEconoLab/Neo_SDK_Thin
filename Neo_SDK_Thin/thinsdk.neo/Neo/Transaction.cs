@@ -180,6 +180,7 @@ namespace ThinSdk.Neo
             using (MemoryStream ms = new MemoryStream())
             using (BinaryWriter writer = new BinaryWriter(ms))
             {
+                writer.Write((uint)1951352142);
                 SerializeUnsigned(writer);
                 writer.Flush();
                 return ms.ToArray();
