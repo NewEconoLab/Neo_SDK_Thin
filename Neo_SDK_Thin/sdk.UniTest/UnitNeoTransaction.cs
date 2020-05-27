@@ -21,11 +21,9 @@ namespace sdk.UniTest
         [Test]
         public async Task Test_Transfer()
         {
-            var b = Convert.FromBase64String("AgCj4REMFM5hb390YX4PxLgFWDryYCojjfY/DBRk306+kjNNH8fmS/HR4zlC2ZBeURPADAh0cmFuc2ZlcgwUO303EcbwzPmx3KkD0b+h2JbxI4xBYn1bUjg=");
-            string str = b.Bytes2HexString();
             var addr1 = Conversion.Address2ScriptHash("NV7LGd57KEsCw2YfDcRosQmeb2qvdamipY");
             var addr2 = Conversion.Address2ScriptHash("NejD7DJWzD48ZG4gXKDVZt3QLf1fpNe1PF");
-            var cli = new ThinSdk.NET.CLI("http://47.99.35.147:20332");
+            var cli = new ThinSdk.NET.CLI("");
             var count = await cli.GetBlockCount();
             var nt = new NeoTransaction(Conversion.Address2ScriptHash("NV7LGd57KEsCw2YfDcRosQmeb2qvdamipY"),count,cli);
             nt.gas.Transfer(addr1,addr2, 300000000);
