@@ -37,8 +37,7 @@ namespace ThinSdk
                 Nonce = (UInt32)new Random().Next(),
                 Sender = _sender,
                 ValidUntilBlock = currentBlockIndex + Transaction.MaxValidUntilBlockIncrement - 1,
-                //Cosigners = new Cosigner[1] { new Cosigner() { Scopes = WitnessScope.CalledByEntry,Account = _sender} },
-                Cosigners = new Cosigner[0] { },
+                Cosigners = new Cosigner[1] { new Cosigner() { Scopes = WitnessScope.CalledByEntry,Account = _sender} },
                 Attributes = new TransactionAttribute[0]
             };
         }
@@ -68,7 +67,10 @@ namespace ThinSdk
 
         public async Task<string> Send(byte[] priKey)
         {
-            BigInteger sysFee = await Cli.GetInvokeGasConsumed(scriptBuilder.ToArray().Bytes2HexString());
+            var pubKey = Conversion.PrivateKey2PublicKey(priKey);
+            var address = Conversion.PublicKey2Address(pubKey);
+            var scriptHash = Conversion.Address2ScriptHash(address);
+            BigInteger sysFee = await Cli.GetInvokeGasConsumed(scriptBuilder.ToArray().Bytes2HexString(),new string[] { scriptHash.ToString() });
             var hexStr = SignAndPack(priKey, sysFee);
             return await Cli.Sendrawtransaction(hexStr);
         }

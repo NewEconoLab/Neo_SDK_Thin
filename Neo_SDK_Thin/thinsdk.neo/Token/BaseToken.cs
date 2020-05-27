@@ -13,7 +13,6 @@ namespace ThinSdk.Token
         public void Transfer(UInt160 from,UInt160 to, BigInteger amount)
         {
             Call("transfer", from, to, amount);
-            ScriptBuilder.Emit(OpCode.THROWIFNOT);
         }
 
         public void Deploy()

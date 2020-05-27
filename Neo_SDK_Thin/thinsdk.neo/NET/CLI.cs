@@ -33,10 +33,16 @@ namespace ThinSdk.NET
             return result;
         }
 
+        public async Task<BigInteger> GetInvokeGasConsumed(string hexStr,string[] scriptHash)
+        {
+            var result = await HttpHelper.RpcPost(URL, "invokescript", new JValue(hexStr),new JArray(scriptHash));
+            var gas_consumed =decimal.Parse((string)JObject.Parse(result)?["result"]["gas_consumed"]);
+            return BigInteger.Parse((gas_consumed).ToString());
+        }
         public async Task<BigInteger> GetInvokeGasConsumed(string hexStr)
         {
             var result = await HttpHelper.RpcPost(URL, "invokescript", new JValue(hexStr));
-            var gas_consumed =decimal.Parse((string)JObject.Parse(result)?["result"]["gas_consumed"]);
+            var gas_consumed = decimal.Parse((string)JObject.Parse(result)?["result"]["gas_consumed"]);
             return BigInteger.Parse((gas_consumed).ToString());
         }
     }

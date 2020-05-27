@@ -40,6 +40,7 @@ namespace ThinSdk
         public void Call(string method,params object[] args)
         {
             ScriptBuilder.EmitAppCall(ContractHash,method,args);
+            ScriptBuilder.Emit(OpCode.ASSERT);
         }
     }
 }

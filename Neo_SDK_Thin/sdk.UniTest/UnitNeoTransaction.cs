@@ -12,6 +12,7 @@ using ThinSdk.Neo.VM;
 using ThinSdk.Token;
 using NUnit.Framework.Constraints;
 using ThinSdk.NET;
+using System.IO;
 
 namespace sdk.UniTest
 {
@@ -20,14 +21,14 @@ namespace sdk.UniTest
         [Test]
         public async Task Test_Transfer()
         {
-            var b= true ^ true;
+            var b = Convert.FromBase64String("AgCj4REMFM5hb390YX4PxLgFWDryYCojjfY/DBRk306+kjNNH8fmS/HR4zlC2ZBeURPADAh0cmFuc2ZlcgwUO303EcbwzPmx3KkD0b+h2JbxI4xBYn1bUjg=");
+            string str = b.Bytes2HexString();
             var addr1 = Conversion.Address2ScriptHash("NV7LGd57KEsCw2YfDcRosQmeb2qvdamipY");
             var addr2 = Conversion.Address2ScriptHash("NejD7DJWzD48ZG4gXKDVZt3QLf1fpNe1PF");
-            var cli = new ThinSdk.NET.CLI();
+            var cli = new ThinSdk.NET.CLI("http://47.99.35.147:20332");
             var count = await cli.GetBlockCount();
             var nt = new NeoTransaction(Conversion.Address2ScriptHash("NV7LGd57KEsCw2YfDcRosQmeb2qvdamipY"),count,cli);
-            nt.neo.Transfer(addr1, addr2, 200);
-            nt.gas.Transfer(addr1,addr2,30000000000);
+            nt.gas.Transfer(addr1,addr2, 300000000);
             var r = await nt.Send(Conversion.WIF2PrivateKey("L1EboNBetFw1JRdoQCjFDjApLrg3pHu62VrD6B983exKYzYpJc1e"));
             Assert.IsNotNull(r);
         }
@@ -48,7 +49,7 @@ namespace sdk.UniTest
         [Test]
         public async Task Test_CreateContract()
         {
-            //var b = Convert.FromBase64String("I3bWcD6Jri7+CSo2fPuihpfMNmo="); //I3bWcD6Jri7\u002BCSo2fPuihpfMNmo=
+            //var b = Convert.FromBase64String("AwC4ZNlFAAAADBTOYW9/dGF+D8S4BVg68mAqI432PwwUZN9OvpIzTR/H5kvx0eM5QtmQXlETwAwIdHJhbnNmZXIMFDt9NxHG8Mz5sdypA9G/odiW8SOMQWJ9W1I4"); //I3bWcD6Jri7\u002BCSo2fPuihpfMNmo=
             //var b2 = new UInt160(b);
             //var bb = System.Text.Encoding.UTF8.GetString(b);
             var addr1 = Conversion.Address2ScriptHash("NejD7DJWzD48ZG4gXKDVZt3QLf1fpNe1PF");

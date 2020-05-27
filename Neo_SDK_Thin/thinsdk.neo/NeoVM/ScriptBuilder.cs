@@ -79,10 +79,15 @@ namespace ThinSdk.Neo.VM
 
         public ScriptBuilder EmitPush(BigInteger number)
         {
-            if (number == -1) return Emit(OpCode.PUSHM1);
-            if (number == 0) return Emit(OpCode.PUSH0);
-            if (number > 0 && number <= 16) return Emit(OpCode.PUSH1 - 1 + (byte)number);
-            return EmitPush(number.ToByteArray());
+            if (number >= -1 && number <= 16) return Emit(OpCode.PUSH0 + (byte)(int)number);
+            byte[] data = number.ToByteArray(isUnsigned: false, isBigEndian: false);
+            if (data.Length == 1) return Emit(OpCode.PUSHINT8, data);
+            if (data.Length == 2) return Emit(OpCode.PUSHINT16, data);
+            if (data.Length <= 4) return Emit(OpCode.PUSHINT32, PadRight(data, 4));
+            if (data.Length <= 8) return Emit(OpCode.PUSHINT64, PadRight(data, 8));
+            if (data.Length <= 16) return Emit(OpCode.PUSHINT128, PadRight(data, 16));
+            if (data.Length <= 32) return Emit(OpCode.PUSHINT256, PadRight(data, 32));
+            throw new ArgumentOutOfRangeException(nameof(number));
         }
 
         public ScriptBuilder EmitPush(bool data)
@@ -144,6 +149,13 @@ namespace ThinSdk.Neo.VM
         {
             writer.Flush();
             return ms.ToArray();
+        }
+        private static byte[] PadRight(byte[] data, int length)
+        {
+            if (data.Length >= length) return data;
+            byte[] buffer = new byte[length];
+            Buffer.BlockCopy(data, 0, buffer, 0, data.Length);
+            return buffer;
         }
     }
 }

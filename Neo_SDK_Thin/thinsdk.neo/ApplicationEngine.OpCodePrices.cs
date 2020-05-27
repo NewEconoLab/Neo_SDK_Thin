@@ -61,8 +61,6 @@ namespace ThinSdk
             [OpCode.CALL_L] = 22000,
             [OpCode.CALLA] = 22000,
             [OpCode.THROW] = 30,
-            [OpCode.THROWIF] = 30,
-            [OpCode.THROWIFNOT] = 30,
             [OpCode.RET] = 0,
             [OpCode.SYSCALL] = 0,
             [OpCode.DEPTH] = 60,

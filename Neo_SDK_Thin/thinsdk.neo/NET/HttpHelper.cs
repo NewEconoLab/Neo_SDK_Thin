@@ -8,7 +8,7 @@ namespace ThinSdk.NET
 {
     public class HttpHelper
     {
-        public static async Task<string> RpcPost(string url, string method, params JValue[] _params)
+        public static async Task<string> RpcPost(string url, string method, params object[] _params)
         {
             var json = new JObject();
             json["id"] = 1;
@@ -18,7 +18,6 @@ namespace ThinSdk.NET
             var array = new JArray();
             for (var i = 0; i < _params.Length; i++)
             {
-
                 array.Add(_params[i]);
             }
             json["params"] = array;
